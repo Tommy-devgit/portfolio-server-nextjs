@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
 
 const connectDB = async () => {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    console.warn("Warning: MONGO_URI is not set in environment (.env). Skipping MongoDB connection.");
+    return;
+  }
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB connected");
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
+    await mongoose.connect(uri);
+    console.log("MongoDB Atlas connected");
+  } catch (error) {
+    console.error("MongoDB connection failed", error);
   }
 };
 
