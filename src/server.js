@@ -1,41 +1,43 @@
 import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
-import postsRoutes from "./routes/posts.js";
+import dotenv from "dotenv";
+import cors from "cors";
+import postsRouter from "./routes/posts.js";
+
 
 dotenv.config();
 
 const app = express();
 
-/* -------------------- MIDDLEWARE -------------------- */
-app.use(cors());
+/* ✅ CORS — must be BEFORE routes */
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-/* -------------------- HEALTH CHECK -------------------- */
+// Healthcheck
 app.get("/", (req, res) => {
-  res.json({
-    status: "ok",
-    message: "Portfolio API is running",
-  });
+  res.json({ status: "ok", message: "Portfolio API running" });
 });
 
-/* -------------------- ROUTES -------------------- */
-app.use("/api/posts", postsRoutes);
+// Routes
+app.use("/api/posts", postsRouter);
 
-/* -------------------- DATABASE -------------------- */
+const PORT = process.env.PORT || 5000;
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB Atlas connected");
+    app.listen(PORT, () =>
+      console.log(`Server running on port ${PORT}`)
+    );
   })
   .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
+    console.error("MongoDB connection error:", err);
   });
-
-/* -------------------- SERVER -------------------- */
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
